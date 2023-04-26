@@ -66,6 +66,7 @@ def get_available_port():
     p = port
     port = str(int(port) + 1)
     return p
+
 def requestNodesCpu():
     nodesCpuUsage={}
     total_cpu_usage = 0.0
@@ -89,18 +90,18 @@ def requestNodesCpu():
             percentage_cpu_usage = round(percentage_cpu_usage,2)
             nodesCpuUsage[name] = percentage_cpu_usage
             total_cpu_usage += percentage_cpu_usage
+            
     if len(client.containers.list()) != 0:
         total_cpu_usage = total_cpu_usage / len(client.containers.list())
-            #round the num to 2 desmal
+        #round the num to 2 desmal
         total_cpu_usage = round(total_cpu_usage, 2)
 
     return {"cpu_data" : nodesCpuUsage, "total_usage": total_cpu_usage}
-
 @app.route('/cloudproxy/initalization')
 def cloud_init():
     if request.method == "GET":
         heavy_pod = Pod("heavy_pod")
-
+        
         return jsonify({"response" : 'success'})
 
 @app.route('/cloudproxy/get_nextav_node',methods=['GET'])
@@ -164,8 +165,8 @@ def node_rm(node_name):
         rm_node(node)
     else:
         return jsonify({"result" : "failure", "response" : "lower size bound reached"})
-    return jsonify({"result" : "success", "name" : node.name, "port" : node.port, "status" : node.status})
-
+    return jsonify({"result" : "success", "name" : node.name, "port" : node.port, "status" : node.status}) 
+    
 @app.route('/cloudproxy/<podId>/all', methods = ['GET'])
 def zyjnmsl(podId):
     result=[] 
@@ -184,6 +185,8 @@ def zyjnmsl(podId):
         else:
             result = "failure"
     return json.dumps(result)
+
+
 @app.route('/cloudproxy/<podId>/allNodes', methods = ['GET'])
 def nodes_list(podId):
     result=[]
@@ -249,7 +252,6 @@ def launch(node_name):
                 launch_node(node_name, node.port)
                 return jsonify ({'response' : 'success' ,'port' : node.port, 'name' : node.name, 'status' : node.status})
         return jsonify({'response' : 'failure', 'result' : 'No more available nodes'})
-
 def launch_node(container_name, port_number):
     # [img, logs] = client.images.build (path='/', rm=True ,dockerfile = './Dockerfile' )
 
@@ -258,7 +260,7 @@ def launch_node(container_name, port_number):
             container.remove(v=True, force=True)
 
     [img, logs] = client.images.build (path='./', rm=True ,dockerfile = './Dockerfile' )
-    container = client.containers.run(image=img, detach=True, name=container_name, command=['python' , 'test.py', container_name],ports={'5000/tcp' : port_number}, tty=True, cpu_quota = 80000, mem_limit = '500m')
+    container = client.containers.run(image=img, detach=True, name=container_name, command=['python' , 'test.py', container_name],ports={'5000/tcp' : port_number}, tty=True, cpu_quota = 50000, mem_limit = '300m')
     # container = client.containers.run(image='ubuntu', detach=True, name=container_name, command=['echo', 'hello', 'world'],ports={'5000/tcp' : port_number})
     node = get_node(container_name)
     node.container = container
