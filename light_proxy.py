@@ -170,7 +170,7 @@ def node_rm(node_name):
         rm_node(node)
         return jsonify({"result" : "success", "name" : node.name, "port" : node.port, "status" : node.status}) 
 @app.route('/cloudproxy/<podId>/all', methods = ['GET'])
-def zyjnmsl(podId):
+def all(podId):
     result=[] 
     if podId == "allPods":
         for node in nodes:
