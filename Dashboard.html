@@ -115,34 +115,34 @@
 					
 					$("#data2 tbody").append("<tr><td>" + value.node + "</td><td>" + value.status + "</td><td>" +"    "+value.usage+"%" +"</td></tr>");
 				});
-				setTimeout(updateData, 1000);
+				//setTimeout(updateData, 1000);
 			})
-			// $.get(url3, function(data) {
-			// 	// parse the JSON data from the API response
-			// 	var values = JSON.parse(data);
-			// 	var keys = Object.keys(values); // get all keys of the object as an array
-			// 	var firstKey = keys.shift(); // remove the first key from the array and return it
-			// 	var firstValue = values[firstKey]; // get the value of the first key
-			// 	var secondKey = keys.shift(); // remove the first key from the array and return it
-			// 	var secondValue = values[secondKey]; // get the value of the first key
-			// 	// clear the old data from the table
-            // 	$("#counter3").empty();
-			// 	$("#data3 tbody").empty();
-            // 	$("#counter3").append("<td>Number of requests</td>"+"<td>"+firstValue.counter+"</td>")
-			// 	//delete values[firstKey]; // delete the first property from the object
-			// 	values.shift()
-            // 	$("#counter3").append("<td>Total CPU usage for this pod</td>"+"<td>"+secondValue.cpu+"</td>")
-			// 	//delete values[firstKey]; // delete the first property from the object
-			// 	values.shift()
-			// 	// add the new data to the table
-			// 	console.log(values)
-			// 	$.each(values, function(index,value) {
-			// 		console.log("Object " + index + ": node = " + value.node + ", status = " + value.status);
+			$.get(url3, function(data) {
+				// parse the JSON data from the API response
+				var values = JSON.parse(data);
+				var keys = Object.keys(values); // get all keys of the object as an array
+				var firstKey = keys.shift(); // remove the first key from the array and return it
+				var firstValue = values[firstKey]; // get the value of the first key
+				var secondKey = keys.shift(); // remove the first key from the array and return it
+				var secondValue = values[secondKey]; // get the value of the first key
+				// clear the old data from the table
+            	$("#counter3").empty();
+				$("#data3 tbody").empty();
+            	$("#counter3").append("<td>Number of requests</td>"+"<td>"+firstValue.counter+"</td>")
+				//delete values[firstKey]; // delete the first property from the object
+				values.shift()
+            	$("#counter3").append("<td>Total CPU usage for this pod</td>"+"<td>"+secondValue.cpu+"</td>")
+				//delete values[firstKey]; // delete the first property from the object
+				values.shift()
+				// add the new data to the table
+				console.log(values)
+				$.each(values, function(index,value) {
+					console.log("Object " + index + ": node = " + value.node + ", status = " + value.status);
 					
-			// 		$("#data3 tbody").append("<tr><td>" + value.node + "</td><td>" + value.status + "</td><td>" +"    "+value.usage+"%" +"</td></tr>");
-			// 	});
-			// 	setTimeout(updateData, 60);
-			// })
+					$("#data3 tbody").append("<tr><td>" + value.node + "</td><td>" + value.status + "</td><td>" +"    "+value.usage+"%" +"</td></tr>");
+				});
+				setTimeout(updateData, 60);
+			})
 
 		}
 
