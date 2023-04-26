@@ -66,7 +66,7 @@ def add_remove_helper(upper_bound, lower_bound, pod_size, pod_name):
 
     while(int(pod_size) < int(lower_bound)): #if pod_size < upper_bound, add pods
         #add new nodes
-        name = str(name_counter) + str(name_counter) + str(name_counter)
+        name = ''.join(random.choices(string.ascii_lowercase, k=4))
         requests.post(proxy_url[pod_name] + '/cloudproxy/' + pod_name + '/nodes/' + name)
         requests.get(resource_manager_url['resource_manager_url']+'/cloud/' + pod_name + '/launch/' + name)
         name_counter = name_counter + 1
