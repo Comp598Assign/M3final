@@ -145,7 +145,6 @@ def usage_monitor_manager3():
         time.sleep(1)  #After finished, we need to also make sure that the upper and lower size cannot be violated
         pod_name = "heavy_pod"
         if elasticity_status[pod_name]['is_on']:
-            elasticity_from_rm[str(pod_name)] = True
             ##### When elasticity manager is enable, the strict upper lower bounds need to be enforced first,
             ##### And not be violated after.
             pod_size = (requests.get(proxy_url[pod_name] + '/cloudproxy/pod_size')).json()['pod_size']
@@ -332,18 +331,18 @@ def cloud_elasticity_disable(pod_name):
     if not elasticity_status[pod_name]['is_on']:
         return jsonify({'response' : "Unapplicable, Aldready diable, cannot diable again"})
     elasticity_status[pod_name]['is_on'] = False
-    # upper_bound = 0
-    # if (pod_name == "light_pod"):
-    #     upper_bound = 3 #for test purpose
-    # elif (pod_name == "medium_pod"):
-    #     upper_bound = 15
-    # elif(pod_name == "heavy_pod"):
-    #     upper_bound = 2 #for demonstration purpose
+    upper_bound = 0
+    if (pod_name == "light_pod"):
+        upper_bound = 3 #for test purpose
+    elif (pod_name == "medium_pod"):
+        upper_bound = 15
+    elif(pod_name == "heavy_pod"):
+        upper_bound = 2 #for demonstration purpose
 
 
-    # pod_size = (requests.get(proxy_url[pod_name] + '/cloudproxy/pod_size')).json()['pod_size']
-    # msg = disable_helper(pod_name, pod_size, upper_bound)
-    # requests.post(proxy_url[pod_name]+'/cloud/elasticity/size/'+pod_name+'/0/' + str(upper_bound))
+    pod_size = (requests.get(proxy_url[pod_name] + '/cloudproxy/pod_size')).json()['pod_size']
+    msg = disable_helper(pod_name, pod_size, upper_bound)
+    requests.post(proxy_url[pod_name]+'/cloud/elasticity/size/'+pod_name+'/0/' + str(upper_bound))
 
     return jsonify({'response' : pod_name+" disabled "})
 

@@ -72,7 +72,7 @@ def requestNodesCpu():
     total_cpu_usage = 0.0
     for node in nodes:
         container = node.container
-        if container is not None:
+        if container is not None and node.status != 'NEW':
         #get container
             status = container.stats(stream=False)
             #container name
