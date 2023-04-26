@@ -95,7 +95,6 @@ def usage_monitor_manager1():
                 print(light_cpu_data["cpu_data"], light_cpu_data["total_usage"])
                 #if pod_size > elasticity_status[pod_name]["upper"], you should not be able to add one more pod
                 if float(light_cpu_data["total_usage"]) > float(elasticity_status[pod_name]['upper']) and (int(pod_size) <int(elasticity_status[pod_name]["upper_size"])):
-                    
                     name = ''.join(random.choices(string.ascii_lowercase, k=4))
                     requests.post(proxy_url[pod_name] + '/cloudproxy/' + pod_name + '/nodes/' + name)
                     requests.get(resource_manager_url['resource_manager_url']+'/cloud/' + pod_name + '/launch/' + name)
