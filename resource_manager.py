@@ -20,10 +20,9 @@ app = Flask(__name__)
 global from_rm
 from_rm = False
 
-elasticity_from_rm = {"light_pod" : False, "medium_pod":False, "heavy_pod": False}
-
 proxy_url = {}
 resource_manager_url = {}
+tool_set_url = {}
 elasticity_status = {"light_pod" : {'is_on' : False, 'lower' : 0, 'upper' : 40, "lower_size":0 ,"upper_size":20}, 
                      "medium_pod" : {'is_on' : False, 'lower' : 0, 'upper' : 40, "lower_size":0 ,"upper_size":15},
                      "heavy_pod" : {'is_on' : False, 'lower' : 0, 'upper' : 40, "lower_size":0 ,"upper_size":10}}
@@ -36,6 +35,7 @@ proxy_url['medium_pod'] = os.environ.get("medium_proxy_ip")
 
 #add env for self call
 resource_manager_url['resource_manager_url'] = os.environ.get('resource_manager_url')
+tool_set_url["tool_set_url"] = os.environ.get('tool_set_url')
 
 jobs =[]
 jobidcounter_fornextjob = 0
@@ -80,7 +80,7 @@ def usage_monitor_manager1():
     
         pod_name = "light_pod"
         if elasticity_status[pod_name]['is_on']:
-            elasticity_from_rm[str(pod_name)] = True
+
             ##### When elasticity manager is enable, the strict upper lower bounds need to be enforced first,
             ##### And not be violated after.
             pod_size = (requests.get(proxy_url[pod_name] + '/cloudproxy/pod_size')).json()['pod_size']
@@ -112,7 +112,7 @@ def usage_monitor_manager2():
         time.sleep(1)  #After finished, we need to also make sure that the upper and lower size cannot be violated
         pod_name = "medium_pod"
         if elasticity_status[pod_name]['is_on']:
-            elasticity_from_rm[str(pod_name)] = True
+
             ##### When elasticity manager is enable, the strict upper lower bounds need to be enforced first,
             ##### And not be violated after.
             pod_size = (requests.get(proxy_url[pod_name] + '/cloudproxy/pod_size')).json()['pod_size']
@@ -145,7 +145,7 @@ def usage_monitor_manager2():
 #         time.sleep(1)  #After finished, we need to also make sure that the upper and lower size cannot be violated
 #         pod_name = "heavy_pod"
 #         if elasticity_status[pod_name]['is_on']:
-#             elasticity_from_rm[str(pod_name)] = True
+
 #             ##### When elasticity manager is enable, the strict upper lower bounds need to be enforced first,
 #             ##### And not be violated after.
 #             pod_size = (requests.get(proxy_url[pod_name] + '/cloudproxy/pod_size')).json()['pod_size']
@@ -223,9 +223,8 @@ def cloud_node(pod_id, name):
 @app.route('/cloud/<pod_id>/rm/<name>', methods = ['DELETE'])
 def cloud_rm_node(pod_id, name):
     if request.method == "DELETE":
-        if elasticity_status[pod_id]['is_on'] and (not elasticity_from_rm[str(pod_id)]):  #if now the elasticity manager is on, unable to remove node
+        if elasticity_status[pod_id]['is_on'] and (tool_set_url["tool_set_url"] == request.remote_addr ):  #if now the elasticity manager is on, unable to remove node
             return jsonify({"response":"Declined to remove node while elasticity manager is on"})     
-        elasticity_from_rm[str(pod_id)] = False
         response = requests.delete(proxy_url[pod_id] + '/cloudproxy/nodes/' + name)
         data = response.json()
 
@@ -325,7 +324,6 @@ def cloud_elasticity_enable(pod_name,lower_size,upper_size):
     elasticity_status[pod_name]["upper_size"] = upper_size
     elasticity_status[pod_name]["lower_size"] = lower_size
     #call 
-    elasticity_from_rm[str(pod_name)] = True
     bounds_setter_response = requests.post(proxy_url[pod_name]+'/cloud/elasticity/size/'+lower_size+'/'+upper_size)
     return (bounds_setter_response.json())
 
@@ -342,7 +340,7 @@ def cloud_elasticity_disable(pod_name):
     elif(pod_name == "heavy_pod"):
         upper_bound = 2 #for demonstration purpose
 
-    elasticity_from_rm[str(pod_name)] = False
+
     pod_size = (requests.get(proxy_url[pod_name] + '/cloudproxy/pod_size')).json()['pod_size']
     msg = disable_helper(pod_name, pod_size, upper_bound)
     requests.post(proxy_url[pod_name]+'/cloud/elasticity/size/'+pod_name+'/0/' + str(upper_bound))
