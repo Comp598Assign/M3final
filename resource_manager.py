@@ -31,7 +31,7 @@ elasticity_status = {"light_pod" : {'is_on' : False, 'lower' : 0, 'upper' : 40, 
 
 proxy_url['light_pod'] = os.environ.get("light_proxy_ip")
 proxy_url['medium_pod'] = os.environ.get("medium_proxy_ip")
-# proxy_url['heavy_pod'] = os.environ.get("heavy_proxy_ip")
+proxy_url['heavy_pod'] = os.environ.get("heavy_proxy_ip")
 
 #add env for self call
 resource_manager_url['resource_manager_url'] = os.environ.get('resource_manager_url')
@@ -140,37 +140,37 @@ def usage_monitor_manager2():
                     requests.delete(resource_manager_url['resource_manager_url']+'/cloud/' + pod_name + '/rm/' + node_to_remove)
 
 
-# def usage_monitor_manager3():
-#     while(True):
-#         time.sleep(1)  #After finished, we need to also make sure that the upper and lower size cannot be violated
-#         pod_name = "heavy_pod"
-#         if elasticity_status[pod_name]['is_on']:
+def usage_monitor_manager3():
+    while(True):
+        time.sleep(1)  #After finished, we need to also make sure that the upper and lower size cannot be violated
+        pod_name = "heavy_pod"
+        if elasticity_status[pod_name]['is_on']:
+            elasticity_from_rm[str(pod_name)] = True
+            ##### When elasticity manager is enable, the strict upper lower bounds need to be enforced first,
+            ##### And not be violated after.
+            pod_size = (requests.get(proxy_url[pod_name] + '/cloudproxy/pod_size')).json()['pod_size']
 
-#             ##### When elasticity manager is enable, the strict upper lower bounds need to be enforced first,
-#             ##### And not be violated after.
-#             pod_size = (requests.get(proxy_url[pod_name] + '/cloudproxy/pod_size')).json()['pod_size']
-
-#             #Use function to make num of nodes within limits
-#             add_remove_helper(elasticity_status[pod_name]["upper_size"], elasticity_status[pod_name]["lower_size"],
-#             pod_size, pod_name)
-#             #####
-#             light_pod_response=requests.get(proxy_url[pod_name] + '/cloudproxy/usage')
-#             if light_pod_response.status_code == 200:
-#                 light_cpu_data=light_pod_response.json()
-#                 print(light_cpu_data["cpu_data"], light_cpu_data["total_usage"])
-#                 #if pod_size > elasticity_status[pod_name]["upper"], you should not be able to add one more pod
-#                 if float(light_cpu_data["total_usage"]) > float(elasticity_status[pod_name]['upper']) and (int(pod_size) <int(elasticity_status[pod_name]["upper_size"])):
+            #Use function to make num of nodes within limits
+            add_remove_helper(elasticity_status[pod_name]["upper_size"], elasticity_status[pod_name]["lower_size"],
+            pod_size, pod_name)
+            #####
+            light_pod_response=requests.get(proxy_url[pod_name] + '/cloudproxy/usage')
+            if light_pod_response.status_code == 200:
+                light_cpu_data=light_pod_response.json()
+                print(light_cpu_data["cpu_data"], light_cpu_data["total_usage"])
+                #if pod_size > elasticity_status[pod_name]["upper"], you should not be able to add one more pod
+                if float(light_cpu_data["total_usage"]) > float(elasticity_status[pod_name]['upper']) and (int(pod_size) <int(elasticity_status[pod_name]["upper_size"])):
                     
-#                     name = ''.join(random.choices(string.ascii_lowercase, k=4))
-#                     requests.post(proxy_url[pod_name] + '/cloudproxy/' + pod_name + '/nodes/' + name)
-#                     requests.get(resource_manager_url['resource_manager_url']+'/cloud/' + pod_name + '/launch/' + name)
-#                 #if pod_size > elasticity_status[pod_name]["lower"] you shouldn't be able to remove pod
-#                 #maybe print message to indicate
-#                 elif float(light_cpu_data["total_usage"]) <float(elasticity_status[pod_name]['lower'])  and (int(pod_size) >int(elasticity_status[pod_name]["lower_size"])):
-#                     data = json.loads(requests.get(proxy_url[pod_name] + '/cloudproxy/allPods/all').text)
-#                     data.pop(0)
-#                     node_to_remove = random.choice(data)['node']
-#                     requests.delete(resource_manager_url['resource_manager_url']+'/cloud/' + pod_name + '/rm/' + node_to_remove)                
+                    name = ''.join(random.choices(string.ascii_lowercase, k=4))
+                    requests.post(proxy_url[pod_name] + '/cloudproxy/' + pod_name + '/nodes/' + name)
+                    requests.get(resource_manager_url['resource_manager_url']+'/cloud/' + pod_name + '/launch/' + name)
+                #if pod_size > elasticity_status[pod_name]["lower"] you shouldn't be able to remove pod
+                #maybe print message to indicate
+                elif float(light_cpu_data["total_usage"]) <float(elasticity_status[pod_name]['lower'])  and (int(pod_size) >int(elasticity_status[pod_name]["lower_size"])):
+                    data = json.loads(requests.get(proxy_url[pod_name] + '/cloudproxy/allPods/all').text)
+                    data.pop(0)
+                    node_to_remove = random.choice(data)['node']
+                    requests.delete(resource_manager_url['resource_manager_url']+'/cloud/' + pod_name + '/rm/' + node_to_remove)                
 
 
 
@@ -388,6 +388,6 @@ if __name__ == '__main__':
     monitor_thread1.start()
     monitor_thread2 = Thread(target=usage_monitor_manager2)
     monitor_thread2.start()
-    # monitor_thread3 = Thread(target=usage_monitor_manager3)
-    # monitor_thread3.start()
+    monitor_thread3 = Thread(target=usage_monitor_manager3)
+    monitor_thread3.start()
     app.run(debug=True, host='0.0.0.0', port=5000)

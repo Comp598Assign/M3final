@@ -60,7 +60,7 @@
 	</table>
 
 	<script>
-		var ip = "172.19.58.150"//replace to ur own rm ip
+		var ip = "192.168.0.148"//replace to ur own rm ip
 		var url = "http://"+ip+":5000/nodes/light_pod"; 
       	var url2 = "http://"+ip+":5000/nodes/medium_pod";
       	var url3 = "http://"+ip+":5000/nodes/heavy_pod";
@@ -141,7 +141,7 @@
 					
 					$("#data3 tbody").append("<tr><td>" + value.node + "</td><td>" + value.status + "</td><td>" +"    "+value.usage+"%" +"</td></tr>");
 				});
-				setTimeout(updateData, 60);
+				setTimeout(updateData, 1000);
 			})
 
 		}
