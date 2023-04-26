@@ -95,7 +95,6 @@ def usage_monitor_manager1():
                 print(light_cpu_data["cpu_data"], light_cpu_data["total_usage"])
                 #if pod_size > elasticity_status[pod_name]["upper"], you should not be able to add one more pod
                 if float(light_cpu_data["total_usage"]) > float(elasticity_status[pod_name]['upper']) and (int(pod_size) <int(elasticity_status[pod_name]["upper_size"])):
-                    
                     name = ''.join(random.choices(string.ascii_lowercase, k=4))
                     requests.post(proxy_url[pod_name] + '/cloudproxy/' + pod_name + '/nodes/' + name)
                     requests.get(resource_manager_url['resource_manager_url']+'/cloud/' + pod_name + '/launch/' + name)
@@ -145,7 +144,6 @@ def usage_monitor_manager3():
         time.sleep(1)  #After finished, we need to also make sure that the upper and lower size cannot be violated
         pod_name = "heavy_pod"
         if elasticity_status[pod_name]['is_on']:
-            elasticity_from_rm[str(pod_name)] = True
             ##### When elasticity manager is enable, the strict upper lower bounds need to be enforced first,
             ##### And not be violated after.
             pod_size = (requests.get(proxy_url[pod_name] + '/cloudproxy/pod_size')).json()['pod_size']
